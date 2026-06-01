@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caida de residente</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Caida Residente">
+
+    <style>
+        :root {
+            --primary: #1e3a8a; /* Azul institucional de alto contraste */
+            --accent: #b91c1c;  /* Rojo alerta */
+            --bg: #f1f5f9;      /* Fondo gris muy claro para descansar la vista */
+            --text: #0f172a;    /* Texto casi negro para máxima lectura */
+            --border: #cbd5e1;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 550px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--bg);
+            padding-bottom: 15px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin: 0 0 5px 0;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #475569;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .datetime-display {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            background: #e0f2fe;
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .config-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #cbd5e1;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.05rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            background-color: #fff;
+            color: var(--text);
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        /* Estilo de botones colapsables */
+        .collapsible-btn {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            text-align: left;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .collapsible-content {
+            display: none;
+            padding: 15px;
+            background: #f8fafc;
+            border: 2px solid var(--border);
+            border-radius: 0 0 8px 8px;
+            margin-top: -10px;
+            margin-bottom: 15px;
+        }
+
+        /* Opciones de Radio y Checkbox Grandes para pantallas táctiles */
+        .option-row {
+            display: flex;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .option-row:last-child {
+            border-bottom: none;
+        }
+
+        input[type="radio"], input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .sub-panel {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .nested-obs {
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: #16a34a; /* Verde éxito */
+            color: white;
+            padding: 16px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 15px;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.99);
+            background-color: #15803d;
+        }
+
+        #configPanel {
+            display: none;
+            background: #fee2e2;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #fca5a5;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <header>
+            <button class="config-btn" onclick="toggleConfig()">⚙️ Conectar base</button>
+            <h1>Caida de residente</h1>
+            <div class="subtitle">Creadora: Lic. Sandra Lagos</div>
+            <div id="datetime" class="datetime-display">Cargando fecha y hora...</div>
+        </header>
+
+        <div id="configPanel">
+            <label style="color:#991b1b;">URL de Google Apps Script:</label>
+            <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+            <button onclick="saveConfig()" style="margin-top:8px; padding:6px 12px; background:#991b1b; color:white; border:none; border-radius:4px; cursor:pointer;">Guardar Conexión</button>
+        </div>
+
+        <form id="caidaForm" onsubmit="enviarDatos(event)">
+            
+            <div class="form-group">
+                <label for="residente">Residente (Nombre y Apellido):</label>
+                <input type="text" id="residente" required placeholder="Ej: Juan Pérez">
+            </div>
+
+            <div class="form-group">
+                <label for="diagMedico">Diagnóstico Médico:</label>
+                <textarea id="diagMedico" rows="2" required placeholder="Escriba el diagnóstico médico..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="diagEnfermeria">Diagnóstico de Enfermería:</label>
+                <textarea id="diagEnfermeria" rows="2" required placeholder="Escriba el diagnóstico de enfermería..."></textarea>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secTurno')">1. Turno <span id="lblTurno">▼</span></button>
+            <div id="secTurno" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="turno" value="Mañana" id="t1" required onclick="setLabel('lblTurno','Mañana')"><label for="t1">1. Mañana</label></div>
+                <div class="option-row"><input type="radio" name="turno" value="Tarde" id="t2" onclick="setLabel('lblTurno','Tarde')"><label for="t2">2. Tarde</label></div>
+                <div class="option-row"><input type="radio" name="turno" value="Noche" id="t3" onclick="setLabel('lblTurno','Noche')"><label for="t3">3. Noche</label></div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secPersonal')">2. Personal de la institución <span id="lblPers">▼</span></button>
+            <div id="secPersonal" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="tipoPersonal" value="Enfermero/a" id="p1" required onclick="evalPersonal('Enfermero/a')"><label for="p1">1. Enfermero/a</label></div>
+                <div class="option-row"><input type="radio" name="tipoPersonal" value="Asistente" id="p2" onclick="evalPersonal('Asistente')"><label for="p2">2. Asistente</label></div>
+                <div class="option-row"><input type="radio" name="tipoPersonal" value="Mucama" id="p3" onclick="evalPersonal('Mucama')"><label for="p3">3. Mucama</label></div>
+                <div class="option-row"><input type="radio" name="tipoPersonal" value="Cocinero" id="p4" onclick="evalPersonal('Cocinero')"><label for="p4">4. Cocinero</label></div>
+                <div class="option-row"><input type="radio" name="tipoPersonal" value="Otros" id="p5" onclick="evalPersonal('Otros')"><label for="p5">5. Otros</label></div>
+                
+                <div id="personalSubPanel" class="sub-panel" style="display:none;">
+                    <div id="persNombreContainer">
+                        <label id="lblPersNombre">Nombre y Apellido del Personal:</label>
+                        <input type="text" id="personalNombre" placeholder="Nombre y Apellido">
+                    </div>
+                    <div id="persObsContainer" class="nested-obs" style="display:none;">
+                        <label>Observaciones (Otros):</label>
+                        <textarea id="personalObs" rows="2" placeholder="Escriba qué otra función cumple..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secLugar')">3. Lugar de caída <span id="lblLugar">▼</span></button>
+            <div id="secLugar" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="lugar" value="Habitación" id="l1" required onclick="evalLugar('Habitación')"><label for="l1">1. Habitación</label></div>
+                <div class="option-row"><input type="radio" name="lugar" value="Baño" id="l2" onclick="evalLugar('Baño')"><label for="l2">2. Baño</label></div>
+                <div class="option-row"><input type="radio" name="lugar" value="Pasillo" id="l3" onclick="evalLugar('Pasillo')"><label for="l3">3. Pasillo</label></div>
+                <div class="option-row"><input type="radio" name="lugar" value="Comedor" id="l4" onclick="evalLugar('Comedor')"><label for="l4">4. Comedor</label></div>
+                <div class="option-row"><input type="radio" name="lugar" value="Patio/Escalera" id="l5" onclick="evalLugar('Patio/Escalera')"><label_for="l5">5. Patio / Escalera</label></div>
+                <div class="option-row"><input type="radio" name="lugar" value="Otros" id="l6" onclick="evalLugar('Otros')"><label for="l6">6. Otros</label></div>
+                
+                <div id="lugarObsContainer" class="sub-panel" style="display:none;">
+                    <label>Observaciones de Lugar:</label>
+                    <textarea id="lugarObs" rows="2" placeholder="Escriba el lugar exacto..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secMecanismo')">4. Mecanismo de la caída <span id="lblMec">▼</span></button>
+            <div id="secMecanismo" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="mecanismo" value="Desde su propia altura" id="m1" required onclick="evalMec('Desde su propia altura')"><label for="m1">1. Desde su propia altura</label></div>
+                <div class="option-row"><input type="radio" name="mecanismo" value="Desde la cama" id="m2" onclick="evalMec('Desde la cama')"><label for="m2">2. Desde la cama</label></div>
+                <div class="option-row"><input type="radio" name="mecanismo" value="Desde la silla" id="m3" onclick="evalMec('Desde la silla')"><label for="m3">3. Desde la silla</label></div>
+                <div class="option-row"><input type="radio" name="mecanismo" value="Desde la silla de ruedas" id="m4" onclick="evalMec('Desde la silla de ruedas')"><label for="m4">4. Desde la silla de ruedas</label></div>
+                <div class="option-row"><input type="radio" name="mecanismo" value="Desde el inodoro" id="m5" onclick="evalMec('Desde el inodoro')"><label for="m5">5. Desde el inodoro</label></div>
+                <div class="option-row"><input type="radio" name="mecanismo" value="Otros" id="m6" onclick="evalMec('Otros')"><label for="m6">6. Otros</label></div>
+                
+                <div id="mecObsContainer" class="sub-panel" style="display:none;">
+                    <label>Observaciones de Mecanismo:</label>
+                    <textarea id="mecanismoObs" rows="2" placeholder="Escriba los detalles del mecanismo..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secEstado')">5. Estado del residente <span id="lblEst">▼</span></button>
+            <div id="secEstado" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="estado" value="Consciente" id="e1" required onclick="evalEstado('Consciente')"><label for="e1">1. Consciente</label></div>
+                <div class="option-row"><input type="radio" name="estado" value="Desorientado" id="e2" onclick="evalEstado('Desorientado')"><label for="e2">2. Desorientado</label></div>
+                <div class="option-row"><input type="radio" name="estado" value="Agitado" id="e3" onclick="evalEstado('Agitado')"><label for="e3">3. Agitado</label></div>
+                <div class="option-row"><input type="radio" name="estado" value="Somnoliento" id="e4" onclick="evalEstado('Somnoliento')"><label for="e4">4. Somnoliento</label></div>
+                <div class="option-row"><input type="radio" name="estado" value="Marcha inestable" id="e5" onclick="evalEstado('Marcha inestable')"><label for="e5">5. Marcha inestable</label></div>
+                <div class="option-row"><input type="radio" name="estado" value="Uso de ayudas técnicas" id="e6" onclick="evalEstado('Uso de ayudas técnicas')"><label for="e6">6. Uso de ayudas técnicas</label></div>
+                <div class="option-row"><input type="radio" name="estado" value="Otros" id="e7" onclick="evalEstado('Otros')"><label for="e7">7. Otros</label></div>
+                
+                <div id="estadoObsContainer" class="sub-panel" style="display:none;">
+                    <label>Observaciones del Estado:</label>
+                    <textarea id="estadoObs" rows="2" placeholder="Escriba observaciones del estado..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secFactores')">6. Factores Contribuyentes <span id="lblFact">▼</span></button>
+            <div id="secFactores" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="factor" value="Piso mojado" id="f1" required onclick="evalFactor('Piso mojado')"><label for="f1">1. Piso mojado</label></div>
+                <div class="option-row"><input type="radio" name="factor" value="Iluminación deficiente" id="f2" onclick="evalFactor('Iluminación deficiente')"><label for="f2">2. Iluminación deficiente</label></div>
+                <div class="option-row"><input type="radio" name="factor" value="Calzado inadecuado" id="f3" onclick="evalFactor('Calzado inadecuado')"><label for="f3">3. Calzado inadecuado</label></div>
+                <div class="option-row"><input type="radio" name="factor" value="Levantarse sin asistencia" id="f4" onclick="evalFactor('Levantarse sin asistencia')"><label for="f4">4. Levantarse sin asistencia</label></div>
+                <div class="option-row"><input type="radio" name="factor" value="Medicación sedante" id="f5" onclick="evalFactor('Medicación sedante')"><label for="f5">5. Medicación sedante</label></div>
+                <div class="option-row"><input type="radio" name="factor" value="Medicación hipotensora" id="f6" onclick="evalFactor('Medicación hipotensora')"><label for="f6">6. Medicación hipotensora</label></div>
+                <div class="option-row"><input type="radio" name="factor" value="Urgencia miccional" id="f7" onclick="evalFactor('Urgencia miccional')"><label for="f7">7. Urgencia miccional</label></div>
+                <div class="option-row"><input type="radio" name="factor" value="Otros" id="f8" onclick="evalFactor('Otros')"><label for="f8">8. Otros</label></div>
+                
+                <div id="factorObsContainer" class="sub-panel" style="display:none;">
+                    <label>Observaciones de Factores:</label>
+                    <textarea id="factorObs" rows="2" placeholder="Describa otros factores..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secConsecuencias')">7. Consecuencias inmediatas <span id="lblCons">▼</span></button>
+            <div id="secConsecuencias" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="consecuencia" value="Sin lesiones aparentes" id="c1" required onclick="evalConsecuencia('Sin lesiones aparentes')"><label for="c1">1. Sin lesiones aparentes</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="Escoriaciones" id="c2" onclick="evalConsecuencia('Escoriaciones')"><label for="c2">2. Escoriaciones</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="Hematoma" id="c3" onclick="evalConsecuencia('Hematoma')"><label for="c3">3. Hematoma</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="Herida cortante" id="c4" onclick="evalConsecuencia('Herida cortante')"><label for="c4">4. Herida cortante</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="Dolor localizado" id="c5" onclick="evalConsecuencia('Dolor localizado')"><label for="c5">5. Dolor localizado</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="Sospecha de fractura" id="c6" onclick="evalConsecuencia('Sospecha de fractura')"><label for="c6">6. Sospecha de fractura</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="TEC" id="c7" onclick="evalConsecuencia('TEC')"><label for="c7">7. TEC</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="Desviación de miembros" id="c8" onclick="evalConsecuencia('Desviación de miembros')"><label for="c8">8. Desviación de miembros</label></div>
+                <div class="option-row"><input type="radio" name="consecuencia" value="Otros" id="c9" onclick="evalConsecuencia('Otros')"><label for="c9">9. Otros</label></div>
+                
+                <div id="consecuenciaObsContainer" class="sub-panel" style="display:none;">
+                    <label>Observaciones de Consecuencias:</label>
+                    <textarea id="consecuenciaObs" rows="2" placeholder="Describa las consecuencias..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secIntervenciones')">8. Intervenciones de enfermería ▼</button>
+            <div id="secIntervenciones" class="collapsible-content">
+                <div style="margin-bottom:10px; font-weight:bold; font-size:0.9rem; color:#475569;">Seleccione SI o NO para cada acción:</div>
+                
+                <div class="option-row">
+                    <span style="flex-grow:1; font-weight:600;">1. Valoración inicial:</span>
+                    <select id="int1" style="width:80px; padding:5px;"><option value="SI">SI</option><option value="NO">NO</option></select>
+                </div>
+                <div class="option-row">
+                    <span style="flex-grow:1; font-weight:600;">2. CSV (Control Signos Vitales):</span>
+                    <select id="int2" style="width:80px; padding:5px;"><option value="SI">SI</option><option value="NO">NO</option></select>
+                </div>
+                <div class="option-row">
+                    <span style="flex-grow:1; font-weight:600;">3. Curación:</span>
+                    <select id="int3" style="width:80px; padding:5px;"><option value="SI">SI</option><option value="NO">NO</option></select>
+                </div>
+                <div class="option-row">
+                    <span style="flex-grow:1; font-weight:600;">4. Aviso al familiar:</span>
+                    <select id="int4" style="width:80px; padding:5px;"><option value="SI">SI</option><option value="NO">NO</option></select>
+                </div>
+                <div class="option-row">
+                    <span style="flex-grow:1; font-weight:600;">5. Llamado de emergencia:</span>
+                    <select id="int5" style="width:80px; padding:5px;"><option value="SI">SI</option><option value="NO">NO</option></select>
+                </div>
+                <div class="option-row">
+                    <span style="flex-grow:1; font-weight:600;">6. Derivación:</span>
+                    <select id="int6" style="width:80px; padding:5px;"><option value="SI">SI</option><option value="NO">NO</option></select>
+                </div>
+                <div class="option-row">
+                    <span style="flex-grow:1; font-weight:600;">7. Aviso al superior:</span>
+                    <select id="int7" style="width:80px; padding:5px;"><option value="SI">SI</option><option value="NO">NO</option></select>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secPreventivas')">9. Medidas preventivas <span id="lblPrev">▼</span></button>
+            <div id="secPreventivas" class="collapsible-content">
+                <div class="option-row"><input type="radio" name="preventiva" value="Observación frecuente" id="pv1" required onclick="evalPrev('Observación frecuente')"><label for="pv1">1. Observación frecuente</label></div>
+                <div class="option-row"><input type="radio" name="preventiva" value="Entrega de ayudas técnicas" id="pv2" onclick="evalPrev('Entrega de ayudas técnicas')"><label for="pv2">2. Entrega de ayudas técnicas</label></div>
+                <div class="option-row"><input type="radio" name="preventiva" value="Adecuación del entorno" id="pv3" onclick="evalPrev('Adecuación del entorno')"><label for="pv3">3. Adecuación del entorno</label></div>
+                <div class="option-row"><input type="radio" name="preventiva" value="Revisión de medicación" id="pv4" onclick="evalPrev('Revisión de medicación')"><label for="pv4">4. Revisión de medicación</label></div>
+                <div class="option-row"><input type="radio" name="preventiva" value="Activar protocolo" id="pv5" onclick="evalPrev('Activar protocolo')"><label for="pv5">5. Activar protocolo</label></div>
+                <div class="option-row"><input type="radio" name="preventiva" value="Otros" id="pv6" onclick="evalPrev('Otros')"><label for="pv6">6. Otros</label></div>
+                
+                <div id="prevObsContainer" class="sub-panel" style="display:none;">
+                    <label>Observaciones de Medidas Preventivas:</label>
+                    <textarea id="prevObs" rows="2" placeholder="Escriba los detalles preventivos..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" class="collapsible-btn" onclick="toggleSection('secGenerales')">10. Observaciones Generales ▼</button>
+            <div id="secGenerales" class="collapsible-content">
+                <label>Datos adicionales o comentarios del evento:</label>
+                <textarea id="obsGenerales" rows="3" placeholder="Ingrese cualquier otra anotación relevante aquí..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">ENVIAR REGISTRO A EXCEL</button>
+
+        </form>
+    </div>
+
+    <script>
+        // Reloj en tiempo real
+        function updateClock() {
+            const now = new Date();
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            document.getElementById('datetime').innerText = now.toLocaleString('es-AR', options);
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Control de secciones colapsables
+        function toggleSection(id) {
+            const elem = document.getElementById(id);
+            elem.style.display = (elem.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function setLabel(lblId, val) {
+            document.getElementById(lblId).innerText = " - " + val + " ✓";
+        }
+
+        // Lógica condicional interactiva de campos
+        function evalPersonal(val) {
+            setLabel('lblPers', val);
+            const subPanel = document.getElementById('personalSubPanel');
+            const obsContainer = document.getElementById('persObsContainer');
+            subPanel.style.display = "block";
+            
+            if(val === "Otros") {
+                obsContainer.style.display = "block";
+                document.getElementById('lblPersNombre').innerText = "Nombre y Apellido de la persona:";
+            } else {
+                obsContainer.style.display = "none";
+                document.getElementById('lblPersNombre').innerText = `Nombre y Apellido de el/la ${val}:`;
+            }
+        }
+
+        function evalLugar(val) {
+            setLabel('lblLugar', val);
+            document.getElementById('lugarObsContainer').style.display = (val === "Otros") ? "block" : "none";
+        }
+
+        function evalMec(val) {
+            setLabel('lblMec', val);
+            document.getElementById('mecObsContainer').style.display = (val === "Otros") ? "block" : "none";
+        }
+
+        function evalEstado(val) {
+            setLabel('lblEst', val);
+            document.getElementById('estadoObsContainer').style.display = (val === "Otros") ? "block" : "none";
+        }
+
+        function evalFactor(val) {
+            setLabel('lblFact', val);
+            document.getElementById('factorObsContainer').style.display = (val === "Otros") ? "block" : "none";
+        }
+
+        function evalConsecuencia(val) {
+            setLabel('lblCons', val);
+            document.getElementById('consecuenciaObsContainer').style.display = (val === "Otros") ? "block" : "none";
+        }
+
+        function evalPrev(val) {
+            setLabel('lblPrev', val);
+            document.getElementById('prevObsContainer').style.display = (val === "Otros") ? "block" : "none";
+        }
+
+        // Configuración y guardado de URL del Script
+        function toggleConfig() {
+            const p = document.getElementById('configPanel');
+            p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function saveConfig() {
+            const url = document.getElementById('scriptUrl').value;
+            localStorage.setItem('caidaScriptUrl', url);
+            alert('¡Conexión guardada con éxito!');
+            document.getElementById('configPanel').style.display = 'none';
+        }
+
+        window.onload = function() {
+            // Conexión fija "de fábrica" para que nadie tenga que configurar nada
+            const urlFija = 'https://script.google.com/macros/s/AKfycbxE-XjBdhBV_GxDnha9yOVJzqdKyGAP40KSLbnDVhbRWMwV_zeXW9cWeGv4lWEyaZiDNA/exec';
+            
+            localStorage.setItem('caidaScriptUrl', urlFija);
+            document.getElementById('scriptUrl').value = urlFija;
+        };
+
+        // Envío de Datos a Google Sheets
+        function enviarDatos(event) {
+            event.preventDefault();
+            
+            const url = localStorage.getItem('caidaScriptUrl');
+            if(!url) {
+                alert('Atención: Primero debes configurar la URL de conexión en el botón del engranaje ⚙️ de arriba.');
+                return;
+            }
+
+            const formData = {
+                fechaHora: document.getElementById('datetime').innerText,
+                residente: document.getElementById('residente').value,
+                diagMedico: document.getElementById('diagMedico').value,
+                diagEnfermeria: document.getElementById('diagEnfermeria').value,
+                turno: document.querySelector('input[name="turno"]:checked')?.value || '',
+                tipoPersonal: document.querySelector('input[name="tipoPersonal"]:checked')?.value || '',
+                personalNombre: document.getElementById('personalNombre').value,
+                personalObs: document.getElementById('personalObs').value,
+                lugar: document.querySelector('input[name="lugar"]:checked')?.value || '',
+                lugarObs: document.getElementById('lugarObs').value,
+                mecanismo: document.querySelector('input[name="mecanismo"]:checked')?.value || '',
+                mecanismoObs: document.getElementById('mecanismoObs').value,
+                estado: document.querySelector('input[name="estado"]:checked')?.value || '',
+                estadoObs: document.getElementById('estadoObs').value,
+                factor: document.querySelector('input[name="factor"]:checked')?.value || '',
+                factorObs: document.getElementById('factorObs').value,
+                consecuencia: document.querySelector('input[name="consecuencia"]:checked')?.value || '',
+                consecuenciaObs: document.getElementById('consecuenciaObs').value,
+                intValoracion: document.getElementById('int1').value,
+                intCSV: document.getElementById('int2').value,
+                intCuracion: document.getElementById('int3').value,
+                intFamiliar: document.getElementById('int4').value,
+                intEmergencia: document.getElementById('int5').value,
+                intDerivacion: document.getElementById('int6').value,
+                intSuperior: document.getElementById('int7').value,
+                preventiva: document.querySelector('input[name="preventiva"]:checked')?.value || '',
+                preventivaObs: document.getElementById('prevObs').value,
+                observacionesGenerales: document.getElementById('obsGenerales').value
+            };
+
+            alert('Enviando reporte a la planilla... Por favor espere.');
+
+            fetch(url, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(() => {
+                alert('¡Reporte guardado con éxito en el Google Drive institucional!');
+                document.getElementById('caidaForm').reset();
+                // Resetear etiquetas visuales
+                document.querySelectorAll('.collapsible-btn span').forEach(s => s.innerText = '▼');
+                document.getElementById('personalSubPanel').style.display = 'none';
+                document.getElementById('lugarObsContainer').style.display = 'none';
+                document.getElementById('mecObsContainer').style.display = 'none';
+                document.getElementById('estadoObsContainer').style.display = 'none';
+                document.getElementById('factorObsContainer').style.display = 'none';
+                document.getElementById('consecuenciaObsContainer').style.display = 'none';
+                document.getElementById('prevObsContainer').style.display = 'none';
+            })
+            .catch(error => {
+                alert('Hubo un inconveniente al enviar los datos de forma directa. Verifique la conexión a internet.');
+                console.error(error);
+            });
+        }
+    </script>
+</body>
+</html>
